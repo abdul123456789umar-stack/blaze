@@ -78,7 +78,7 @@ Always reference these instructions first and fallback to search or bash command
 # NEVER CANCEL - Set timeout to 30+ minutes
 
 # Specific test classes
-./gradlew test --tests="com.blurr.voice.agent.v2.SystemPromptTest"
+./gradlew test --tests="com.blaze.agent.agent.v2.SystemPromptTest"
 ```
 
 ### Development Workflow
@@ -87,7 +87,7 @@ Always reference these instructions first and fallback to search or bash command
 ./gradlew installDebug
 
 # Install and launch
-./gradlew installDebug && adb shell am start -n com.blurr.voice/.MainActivity
+./gradlew installDebug && adb shell am start -n com.blaze.agent/.MainActivity
 
 # View live logs (useful for debugging)
 adb logcat | grep GeminiApi
@@ -112,7 +112,7 @@ When making changes to core functionality:
 
 ### Key Directories
 ```
-app/src/main/java/com/blurr/voice/
+app/src/main/java/com.blaze.agent/
 ├── agent/               # AI agent logic and prompts
 ├── api/                 # API integrations (Gemini, etc.)
 ├── services/            # Android services (AgentTaskService, etc.)
@@ -122,9 +122,9 @@ app/src/main/java/com/blurr/voice/
 ```
 
 ### Important Files
-- `app/src/main/java/com/blurr/voice/services/AgentTaskService.kt` - Core agent execution service
-- `app/src/main/java/com/blurr/voice/api/GeminiApi.kt` - Gemini AI integration
-- `app/src/main/java/com/blurr/voice/v2/llm/GeminiAPI.kt` - Enhanced Gemini API v2
+- `app/src/main/java/com.blaze.agent/services/AgentTaskService.kt` - Core agent execution service
+- `app/src/main/java/com.blaze.agent/api/GeminiApi.kt` - Gemini AI integration
+- `app/src/main/java/com.blaze.agent/v2/llm/GeminiAPI.kt` - Enhanced Gemini API v2
 - `app/src/main/AndroidManifest.xml` - App permissions and services
 - `local.properties` - API keys and SDK configuration (never commit)
 - `gradle/libs.versions.toml` - Dependency versions
@@ -223,8 +223,8 @@ adb logcat | grep GeminiApi
 - Mem0: https://mem0.ai/
 
 ### File Locations
-- Main source: `app/src/main/java/com/blurr/voice/`
-- Tests: `app/src/test/java/com/blurr/voice/`
+- Main source: `app/src/main/java/com.blaze.agent/`
+- Tests: `app/src/test/java/com.blaze.agent/`
 - Resources: `app/src/main/res/`
 - Build config: `app/build.gradle.kts`
 - Dependencies: `gradle/libs.versions.toml` (AGP version 8.9.2 - NEVER change to 8.5.2)

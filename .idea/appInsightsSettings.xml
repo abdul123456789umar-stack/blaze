@@ -22,7 +22,7 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.blurr.voice" />
+                  <option name="appId" value="com.blaze.agent" />
                   <option name="mobileSdkAppId" value="1:561198985777:android:a97a02b7cdceb62906db10" />
                   <option name="projectId" value="black-radius-341415" />
                   <option name="projectNumber" value="561198985777" />

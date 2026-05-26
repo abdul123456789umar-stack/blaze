@@ -1,8 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:description="@string/accessibility_service_description"
-    android:accessibilityEventTypes="typeWindowStateChanged|typeViewClicked|typeViewFocused"
-    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagReportViewIds|flagRetrieveInteractiveWindows"
-    android:notificationTimeout="100"
-    android:canRetrieveWindowContent="true"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeViewClicked"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagRetrieveInteractiveWindows|flagIncludeNotImportantViews|flagReportViewIds"
     android:canPerformGestures="true"
-    android:canTakeScreenshot="true" />
+    android:canRetrieveWindowContent="true"
+    android:canRequestFilterKeyEvents="false"
+    android:description="@string/accessibility_service_description"
+    android:notificationTimeout="300"
+    android:settingsActivity=".MainActivity"
+    android:summary="Blaze uses accessibility to see your screen and perform tasks you ask for by voice." />
