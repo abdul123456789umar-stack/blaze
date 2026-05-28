@@ -76,6 +76,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.media:media:1.7.0")
+    implementation(libs.androidx.appcompat)
+    implementation("com.google.android.material:material:1.12.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
