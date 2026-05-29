@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val localProps = Properties().apply {
@@ -23,6 +24,8 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        buildConfigField("String", "GCLOUD_PROXY_URL", "\"\"")
+        buildConfigField("String", "GCLOUD_PROXY_URL_KEY", "\"\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk { abiFilters += listOf("arm64-v8a") }
     }
@@ -61,6 +64,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.generativeai)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
