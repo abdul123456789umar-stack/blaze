@@ -10,42 +10,20 @@ object TaskLogger {
     private const val MAX_LOGS = 1000
 
     fun log(context: Context, input: String, output: String) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val logs = getLogs(context).toMutableList()
-
-        val newLog = TaskLog(
-            uid = UUID.randomUUID().toString(),
-            timestamp = System.currentTimeMillis(),
-            input = input,
-            output = output
-        )
-
-        logs.add(0, newLog) // Add to the beginning
-
-        if (logs.size > MAX_LOGS) {
-            logs.removeAt(logs.lastIndex)
-        }
-
-        saveLogs(prefs, logs)
+        // MVP: No-op for testing - just log
+        android.util.Log.d("TaskLogger", "Log: input=$input, output=$output")
     }
 
     fun getLogs(context: Context): List<TaskLog> {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        // For MVP, return empty list - no serialization library needed
         return emptyList()
     }
 
     fun getLog(context: Context, uid: String): TaskLog? {
-        return getLogs(context).find { it.uid == uid }
+        return null
     }
 
     fun clearLogs(context: Context) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().remove(KEY_LOGS).apply()
-    }
-
-    private fun saveLogs(prefs: SharedPreferences, logs: List<TaskLog>) {
-        // For MVP, skip saving - no serialization library needed
+        // MVP: No-op
     }
 }
 
