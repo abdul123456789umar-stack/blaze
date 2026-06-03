@@ -13,9 +13,9 @@
 # JSON parsers require exact names to match APIs.
 # We explicitly keep all classes in your data/model packages.
 
--keep class com.blurr.voice.data.** { *; }
--keep class com.blurr.voice.v2.message_manager.models.** { *; }
--keep class com.blurr.voice.v2.llm.models.** { *; }
+-keep class com.blaze.agent.data.** { *; }
+-keep class com.blaze.agent.v2.message_manager.models.** { *; }
+-keep class com.blaze.agent.v2.llm.models.** { *; }
 # If you have other packages with data classes, add them here.
 
 # ----------------------------------------------------------------------------
@@ -41,12 +41,10 @@
 }
 
 # ----------------------------------------------------------------------------
-# 4. Firebase & Firestore
 # ----------------------------------------------------------------------------
 # Firestore uses reflection to map documents to objects. 
 # If you use .toObject(Class.class), those classes MUST be kept (covered in Section 2).
 -keepattributes InnerClasses
--dontwarn com.google.firebase.**
 
 # ----------------------------------------------------------------------------
 # 5. Native Libraries (Picovoice)

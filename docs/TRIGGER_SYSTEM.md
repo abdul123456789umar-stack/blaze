@@ -96,7 +96,7 @@ The Trigger System allows Panda to be initiated from various entry points, enabl
 
 ### File Structure
 ```
-app/src/main/java/com/blurr/voice/triggers/
+app/src/main/java/com.blaze.agent/triggers/
 ├── ui/
 │   ├── AppAdapter.kt
 │   ├── AppInfo.kt

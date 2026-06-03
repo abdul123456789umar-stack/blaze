@@ -16,7 +16,6 @@ local.properties
 *.tmp
 *.temp
 app/build.gradle.kts.bak
-app/google-services.json
 
 # Kotlin/Java build artifacts
 *.class

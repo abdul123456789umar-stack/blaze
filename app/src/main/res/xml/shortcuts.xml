@@ -7,9 +7,9 @@
         android:shortcutShortLabel="@string/shortcut_wake_up_short"
         android:shortcutLongLabel="@string/shortcut_wake_up_long">
         <intent
-            android:action="com.blurr.voice.WAKE_UP_PANDA"
-            android:targetPackage="com.blurr.voice"
-            android:targetClass="com.blurr.voice.MainActivity" />
+            android:action="com.blaze.agent.WAKE_UP_PANDA"
+            android:targetPackage="com.blaze.agent"
+            android:targetClass="com.blaze.agent.MainActivity" />
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 </shortcuts>

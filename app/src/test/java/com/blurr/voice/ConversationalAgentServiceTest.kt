@@ -1,4 +1,4 @@
-package com.blurr.voice
+package com.blaze.agent
 
 import org.junit.Test
 import org.junit.Assert.*
