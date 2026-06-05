@@ -26,6 +26,7 @@ Java_com_blaze_agent_ai_BonsaiInference_loadModel(JNIEnv* env, jobject, jstring 
     g_model = llama_load_model_from_file(path, mParams);
     env->ReleaseStringUTFChars(modelPath, path);
     if (!g_model) { LOGE("Failed to load model"); return 0; }
+    const llama_vocab* vocab = llama_model_get_vocab(g_model);
     llama_context_params cParams = llama_context_default_params();
     cParams.n_ctx = (uint32_t)nCtx;
     cParams.n_threads = (uint32_t)nThreads;
@@ -43,8 +44,9 @@ Java_com_blaze_agent_ai_BonsaiInference_complete(JNIEnv* env, jobject, jstring j
     const char* promptStr = env->GetStringUTFChars(jPrompt, nullptr);
     std::string prompt(promptStr);
     env->ReleaseStringUTFChars(jPrompt, promptStr);
+    const llama_vocab* vocab = llama_model_get_vocab(g_model);
     std::vector<llama_token> tokens(prompt.size() + 128);
-    int nTokens = llama_tokenize(g_model, prompt.c_str(), (int32_t)prompt.size(), tokens.data(), (int32_t)tokens.size(), true, true);
+    int nTokens = llama_tokenize(vocab, prompt.c_str(), (int32_t)prompt.size(), tokens.data(), (int32_t)tokens.size(), true, true);
     if (nTokens < 0) return env->NewStringUTF("[ERROR: Tokenization failed]");
     tokens.resize(nTokens);
     llama_batch batch = llama_batch_init(nTokens, 0, 1);
@@ -63,9 +65,9 @@ Java_com_blaze_agent_ai_BonsaiInference_complete(JNIEnv* env, jobject, jstring j
     llama_sampler_chain_add(sampler, llama_sampler_init_dist(42));
     while (n_cur < nTokens + maxTokens) {
         llama_token newToken = llama_sampler_sample(sampler, g_context, -1);
-        if (llama_token_is_eog(g_model, newToken)) break;
+        if (llama_vocab_is_eog(vocab, newToken)) break;
         char buf[256];
-        int n = llama_token_to_piece(g_model, newToken, buf, sizeof(buf), 0, true);
+        int n = llama_token_to_piece(vocab, newToken, buf, sizeof(buf), 0, true);
         if (n > 0) result.append(buf, n);
         llama_batch nb = llama_batch_init(1, 0, 1);
         nb.token[0] = newToken; nb.pos[0] = n_cur;
@@ -74,7 +76,7 @@ Java_com_blaze_agent_ai_BonsaiInference_complete(JNIEnv* env, jobject, jstring j
         n_cur++;
     }
     llama_sampler_free(sampler);
-    llama_kv_cache_clear(g_context);
+    llama_kv_self_clear(g_context);
     return env->NewStringUTF(result.c_str());
 }
 
