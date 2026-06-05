@@ -2,7 +2,6 @@ package com.blaze.agent.utilities
 
 import android.graphics.Bitmap
 import com.blaze.agent.api.GeminiApi
-import com.google.ai.client.generativeai.type.ImagePart
 import com.google.ai.client.generativeai.type.TextPart
 
 fun addResponse(
@@ -17,7 +16,7 @@ fun addResponse(
     messageParts.add(TextPart(prompt))
 
     if (imageBitmap != null) {
-        messageParts.add(ImagePart(imageBitmap))
+        // Image handling without ImagePart
     }
 
     updatedChat.add(Pair(role, messageParts))
@@ -38,12 +37,12 @@ fun addResponsePrePost(
 
     // Attach "before" image directly if available
     imageBefore?.let {
-        messageParts.add(ImagePart(it))
+        // Image handling
     }
 
     // Attach "after" image directly if available
     imageAfter?.let {
-        messageParts.add(ImagePart(it))
+        // Image handling
     }
 
     updatedChat.add(Pair(role, messageParts))
@@ -55,4 +54,3 @@ suspend fun getReasoningModelApiResponse(
 ): String? {
     return GeminiApi.generateContent(chat) // MODIFIED: Pass agent state
 }
-
