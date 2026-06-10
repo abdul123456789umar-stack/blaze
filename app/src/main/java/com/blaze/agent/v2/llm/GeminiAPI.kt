@@ -66,10 +66,9 @@ class GeminiApi(
 
 
 
-    private val jsonGenerationConfig = GenerationConfig.builder().apply {
+    private val jsonGenerationConfig = generationConfig {
         responseMimeType = "application/json"
-//        responseSchema = agentOutputSchema
-    }.build()
+    }
 
     private val requestOptions = RequestOptions(timeout = 60.seconds)
 
