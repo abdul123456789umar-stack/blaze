@@ -27,6 +27,10 @@ android {
         buildConfigField("String", "GEMINI_API_KEYS", "\"$geminiApiKey\"")
         buildConfigField("String", "GCLOUD_PROXY_URL", "\"\"")
         buildConfigField("String", "GCLOUD_PROXY_URL_KEY", "\"\"")
+        buildConfigField("String", "GOOGLE_TTS_API_KEY", "\"\"")
+        buildConfigField("String", "MEM0_API", "\"\"")
+        buildConfigField("String", "GCLOUD_GATEWAY_URL", "\"\"")
+        buildConfigField("String", "GCLOUD_GATEWAY_PICOVOICE_KEY", "\"\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk { abiFilters += listOf("arm64-v8a") }
     }

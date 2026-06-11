@@ -44,11 +44,7 @@ class TTSManager private constructor(private val context: Context) : TextToSpeec
 
     var utteranceListener: ((isSpeaking: Boolean) -> Unit)? = null
 
-    private var isDebugMode: Boolean = try {
-        BuildConfig.SPEAK_INSTRUCTIONS
-    } catch (e: Exception) {
-        true
-    }
+    private var isDebugMode: Boolean = true
 
     // --- NEW: Caching System ---
     private val cacheDir by lazy { File(context.cacheDir, "tts_cache") }

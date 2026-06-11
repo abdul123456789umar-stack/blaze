@@ -30,27 +30,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 
-/**
- * A Foreground Service responsible for hosting and running the AI Agent.
- *
- * This service manages the entire lifecycle of the agent, from initializing its components
- * to running its main loop in a background coroutine. It starts as a foreground service
- * to ensure the OS does not kill it while it's performing a long-running task.
- */
 class AgentService : Service() {
 
     private val TAG = "AgentService"
-
-    // A dedicated coroutine scope tied to the service's lifecycle.
-    // Using a SupervisorJob ensures that if one child coroutine fails, it doesn't cancel the whole scope.
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val visualFeedbackManager by lazy { VisualFeedbackManager.getInstance(this) }
 
-    // Declare agent and its dependencies. They will be initialized in onCreate.
     private val taskQueue: Queue<String> = ConcurrentLinkedQueue()
     private lateinit var agent: Agent
     private lateinit var settings: AgentSettings
@@ -76,9 +64,6 @@ class AgentService : Service() {
         var currentTask: String? = null
             private set
 
-        /**
-         * A public method to request the service to stop from outside.
-         */
         fun stop(context: Context) {
             Log.d("AgentService", "External stop request received.")
             val intent = Intent(context, AgentService::class.java).apply {
@@ -91,15 +76,6 @@ class AgentService : Service() {
             Log.d("AgentService", "Starting service with task: $task")
             val intent = Intent(context, AgentService::class.java).apply {
                 putExtra(EXTRA_TASK, task)
-            }
-            try {
-                kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                    try {
-                        com.blaze.agent.utilities.FreemiumManager().decrementTaskCount()
-                    } catch (_: Exception) {
-                    }
-                }
-            } catch (_: Exception) {
             }
             context.startService(intent)
         }
@@ -115,12 +91,12 @@ class AgentService : Service() {
         visualFeedbackManager.showTtsWave()
         createNotificationChannel()
 
-        settings = AgentSettings() // Use default settings for now
-        fileSystem = FileSystem(this,)
+        settings = AgentSettings() 
+        fileSystem = FileSystem(this)
         memoryManager = MemoryManager(this, "", fileSystem, settings)
         perception = Perception(Eyes(this), SemanticParser())
         llmApi = GeminiApi(
-            "gemini-2.5-flash",
+            "gemini-2.0-flash",
             apiKeyManager = ApiKeyManager,
             context = this,
             maxRetry = 10
@@ -139,78 +115,49 @@ class AgentService : Service() {
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "onStartCommand received.")
-
-        // Handle stop action
         if (intent?.action == ACTION_STOP_SERVICE) {
-            Log.i(TAG, "Received stop action. Stopping service.")
-            stopSelf() // onDestroy will handle cleanup
+            stopSelf()
             return START_NOT_STICKY
         }
 
-        // Add new task to the queue
         intent?.getStringExtra(EXTRA_TASK)?.let {
             if (it.isNotBlank()) {
-                Log.d(TAG, "Adding task to queue: $it")
                 taskQueue.add(it)
             }
         }
 
-        // If the agent is not already processing tasks, start the loop.
         if (!isRunning && taskQueue.isNotEmpty()) {
-            Log.i(TAG, "Agent not running, starting processing loop.")
             serviceScope.launch {
                 processTaskQueue()
             }
-        } else {
-            if(isRunning) Log.d(TAG, "Task added to queue. Processor is already running.")
-            else Log.d(TAG, "Service started with no task, waiting for tasks.")
         }
-
-        // Use START_STICKY to ensure the service stays running in the background
-        // until we explicitly stop it. This is crucial for a queue-based system.
         return START_STICKY
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
     private suspend fun processTaskQueue() {
-        if (isRunning) {
-            Log.d(TAG, "processTaskQueue called but already running.")
-            return
-        }
+        if (isRunning) return
         isRunning = true
 
-        Log.i(TAG, "Starting task processing loop.")
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         startForeground(NOTIFICATION_ID, createNotification("Agent is starting..."))
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         while (taskQueue.isNotEmpty()) {
-            val task = taskQueue.poll() ?: continue // Dequeue task, continue if null
+            val task = taskQueue.poll() ?: continue
             currentTask = task
-
-            // Update notification for the new task
             notificationManager.notify(NOTIFICATION_ID, createNotification("Agent is running task: $task"))
 
             try {
-                Log.i(TAG, "Executing task: $task")
                 agent.run(task)
-                trackTaskCompletion(task, true)
-                Log.i(TAG, "Task completed successfully: $task")
             } catch (e: Exception) {
-                Log.e(TAG, "Task failed with an exception: $task", e)
-                trackTaskCompletion(task, false, e.message)
-                // Optionally update notification to show error state
+                Log.e(TAG, "Task failed: $task", e)
             }
         }
-
-        Log.i(TAG, "Task queue is ActionExecutorempty. Stopping service.")
-        stopSelf() // Stop the service only when the queue is empty
+        stopSelf()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(TAG, "onDestroy: Service is being destroyed.")
-//        overlayManager.stopObserving()
         OverlayDispatcher.clearAll()
         overlayManager.stopObserving()
         isRunning = false
@@ -218,20 +165,10 @@ class AgentService : Service() {
         taskQueue.clear()
         serviceScope.cancel()
         visualFeedbackManager.hideTtsWave()
-        Log.i(TAG, "Service destroyed and all resources cleaned up.")
     }
 
-    /**
-     * This service does not provide binding, so we return null.
-     */
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
-    /**
-     * Creates the NotificationChannel for the foreground service.
-     * This is required for Android 8.0 (API level 26) and higher.
-     */
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
@@ -244,82 +181,20 @@ class AgentService : Service() {
         }
     }
 
-    /**
-     * Creates the persistent notification for the foreground service.
-     */
     private fun createNotification(contentText: String): Notification {
-
         val stopIntent = Intent(this, AgentService::class.java).apply {
             action = ACTION_STOP_SERVICE
         }
         val stopPendingIntent = PendingIntent.getService(
-            this,
-            0,
-            stopIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            this, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Panda Doing Task (Expand to stop Panda)")
+            .setContentTitle("Blaze Agent Active")
             .setContentText(contentText)
-            .addAction(
-                android.R.drawable.ic_media_pause, // Using built-in pause icon as stop button
-                "Stop Panda",
-                stopPendingIntent
-            )
-            .setOngoing(true) // Makes notification persistent and harder to dismiss
-             .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .addAction(android.R.drawable.ic_media_pause, "Stop", stopPendingIntent)
+            .setOngoing(true)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .build()
-    }
-
-    /**
-     */
-            Log.w(TAG, "Cannot track task, user is not logged in.")
-            return
-        }
-
-        try {
-            val taskEntry = hashMapOf(
-                "task" to task,
-                "status" to "started",
-                "startedAt" to Timestamp.now(),
-                "completedAt" to null,
-                "success" to null,
-                "errorMessage" to null
-            )
-
-            // Append the task to the user's taskHistory array
-                .update("taskHistory", FieldValue.arrayUnion(taskEntry))
-                .await()
-
-        } catch (e: Exception) {
-        }
-    }
-
-    /**
-     * Since Firestore doesn't support updating array elements directly,
-     * we'll add a new completion entry to track the result.
-     */
-    private suspend fun trackTaskCompletion(task: String, success: Boolean, errorMessage: String? = null) {
-            Log.w(TAG, "Cannot track task completion, user is not logged in.")
-            return
-        }
-
-        try {
-            val completionEntry = hashMapOf(
-                "task" to task,
-                "status" to if (success) "completed" else "failed",
-//                "startedAt" to null, // This is a completion entry, not a start entry
-                "completedAt" to Timestamp.now(),
-                "success" to success,
-                "errorMessage" to errorMessage
-            )
-
-            // Append the completion status to the user's taskHistory array
-                .update("taskHistory", FieldValue.arrayUnion(completionEntry))
-                .await()
-
-        } catch (e: Exception) {
-        }
     }
 }

@@ -38,11 +38,7 @@ class MyApplication : Application(), PurchasesUpdatedListener {
         super.onCreate()
         appContext = applicationContext
 
-        val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = if (BuildConfig.DEBUG) 1L else 3L
-        }
-        remoteConfig.setConfigSettingsAsync(configSettings)
-        remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
+        // Firebase Remote Config removed
 
 
         billingClient = BillingClient.newBuilder(this)

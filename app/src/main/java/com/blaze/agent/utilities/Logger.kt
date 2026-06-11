@@ -7,7 +7,7 @@ object Logger {
     private const val DEFAULT_TAG = "BlurrVoice"
     
     // Enable logging based on build configuration
-    private val isLoggingEnabled = BuildConfig.ENABLE_LOGGING
+    private val isLoggingEnabled = true
     
     fun d(tag: String = DEFAULT_TAG, message: String) {
         if (isLoggingEnabled) {
